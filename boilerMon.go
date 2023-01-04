@@ -17,6 +17,19 @@ func main() {
 		return
 	}
 
+	err := boiler.AddZone("LivingRoom", 2)
+	if err != nil {
+		fmt.Println("Error adding LivingRoom zone")
+	}
+	err = boiler.AddZone("BedRoom", 3)
+	if err != nil {
+		fmt.Println("Error adding bedroom zone")
+	}
+	err = boiler.AddZone("Basement", 4)
+	if err != nil {
+		fmt.Println("Error adding Basement zone")
+	}
+
 	for {
 		if err = boiler.Update(); err != nil {
 			fmt.Printf("Error updating boiler: %v\n", err)
