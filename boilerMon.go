@@ -1,7 +1,11 @@
 package main
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
+	"log"
+	"net"
 	"time"
 
 	"github.com/dugwill/triangleTube"
@@ -17,17 +21,26 @@ func main() {
 		return
 	}
 
-	err := boiler.AddZone("LivingRoom", 2)
+	err := boiler.AddZone("LivingRoom", 4)
 	if err != nil {
 		fmt.Println("Error adding LivingRoom zone")
 	}
-	err = boiler.AddZone("BedRoom", 3)
+	err = boiler.AddZone("BedRoom", 23)
 	if err != nil {
 		fmt.Println("Error adding bedroom zone")
 	}
-	err = boiler.AddZone("Basement", 4)
+	err = boiler.AddZone("Basement", 25)
 	if err != nil {
 		fmt.Println("Error adding Basement zone")
+	}
+
+	// Open connection to ELK via Vector
+	eventEndpoint := "127.0.0.1:9000"
+	eventSocket, err := net.Dial("tcp", eventEndpoint)
+	if err != nil {
+		log.Println("Error opening event socket. Events will not be stored")
+	} else {
+		log.Println("StoreEvents enabled")
 	}
 
 	for {
@@ -35,6 +48,13 @@ func main() {
 			fmt.Printf("Error updating boiler: %v\n", err)
 		} else {
 			boiler.PrintJson()
+
+			jsonString, err := json.Marshal(boiler)
+			if err != nil {
+				log.Printf("error marshalling event %v ", err)
+				continue
+			}
+			fmt.Fprintln(eventSocket, bytes.NewBuffer(jsonString))
 		}
 		fmt.Println("**************************************")
 		time.Sleep(5 * time.Second)
